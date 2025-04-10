@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Steed Media Mindmap</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: 'Schibsted Grotesk', 'Instrument Sans', sans-serif;
+      background-color: #f4f1f1;
+      color: #2a423f;
+    }
+
+    h1 {
+      color: #ee0505;
+    }
+
+    #mindmapContainer {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Steed Media Mindmap</h1>
+
+<script>
+  // Prompt for password before showing the mind map
+  const password = prompt("Enter the password to view the mind map:");
+
+  if (password === "steed2025") {
+    // If password is correct, show the mind map
+    document.getElementById("mindmapContainer").style.display = "block";
+  } else {
+    alert("Incorrect password!");
+    window.location = "about:blank"; // Redirect if incorrect
+  }
+</script>
+
+<!-- Your mindmap content will be placed here -->
+<div id="mindmapContainer">
+  <div id="searchBar"></div>
+  <div id="mindmapContent"></div>
+  <!-- Additional code for displaying the mind map here -->
+</div>
+
+</body>
+</html>
