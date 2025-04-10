@@ -1,71 +1,7 @@
-### Python ###
-# Byte-compiled / optimized / DLL files
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.python-version
-
-# Build, dist, and packaging
-build/
-dist/
-*.egg-info/
-*.egg
-*.manifest
-*.spec
-pip-log.txt
-
-# Installer and environment files
-.env                # Local environment variables (keep secrets out of repo)
-.venv/              # Virtual environment
-env/
-venv/
-ENV/
-env.bak/
-venv.bak/
-
-# Testing and coverage
-.coverage
-htmlcov/
-.pytest_cache/
-.nox/
-.tox/
-
-# Jupyter and IDE
-.ipynb_checkpoints
-.idea/
-.vscode/
-.spyproject
-.ropeproject
-
-### Notion/GitHub Actions ###
-# Local script outputs (if not committed)
-local_output.json
-
-# GitHub Actions artifacts
-.github/workflows/*.yaml.bak  # Backup workflow files
-action-*.log                 # Action logs (if any local testing)
-
-### Security ###
-# Secrets and sensitive files
+# Security
 secrets.json
 *.key
 *.pem
-*.cert
-credentials.*
 
-### Documentation ###
-docs/_build/      # Sphinx or other doc builds
-site/             # MkDocs output
-
-### OS-generated ###
-.DS_Store
-Thumbs.db
-*.swp
-*.swo
-
-### Project-specific ###
-# Add any tool-specific files (e.g., PDM, Poetry)
-.pdm.toml
-poetry.lock
-uv.lock
+# Local development artifacts
+local_output.json
