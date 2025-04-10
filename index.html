@@ -10,10 +10,6 @@
       font-family: 'Schibsted Grotesk', 'Instrument Sans', sans-serif;
       background: #f4f4f4;
       color: #2a423f;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
     }
     h1 {
       text-align: center;
@@ -23,8 +19,10 @@
     }
     #mindmap {
       width: 100vw;
-      height: 100vh;
-      overflow: hidden;
+      height: 80vh;
+      overflow: auto;
+      margin: 0 auto;
+      display: block;
     }
     .node circle {
       fill: #2a423f;
@@ -50,139 +48,86 @@
       font-size: 13px;
       display: none;
     }
-    #login {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      background-color: #2D3047;
-      padding: 30px;
-      border-radius: 10px;
-    }
-    #login input {
-      padding: 10px;
-      font-size: 16px;
-      margin: 10px 0;
-    }
-    #login button {
-      padding: 10px 20px;
-      font-size: 16px;
-      background-color: #2f3b2d;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-    #login button:hover {
-      background-color: #ee0505;
+    .node rect {
+      fill: #ffe031;
+      stroke: #2a423f;
+      stroke-width: 1px;
+      border-radius: 5px;
     }
   </style>
 </head>
 <body>
-  <!-- Login Form -->
-  <div id="login">
-    <h2>Enter Password to Access the Mindmap</h2>
-    <input type="password" id="pw" placeholder="Password" />
-    <button onclick="checkPassword()">Enter</button>
-  </div>
-
-  <!-- Mindmap SVG Container -->
-  <div id="mindmap-container" style="display: none;">
-    <h1>Steed Media Mindmap</h1>
-    <svg id="mindmap"></svg>
-    <div class="tooltip" id="tooltip"></div>
-  </div>
+  <h1>Steed Media Mindmap</h1>
+  <svg id="mindmap"></svg>
+  <div class="tooltip" id="tooltip"></div>
 
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <script>
-    // Password Protection
-    function checkPassword() {
-      const correctPassword = "steed2025";
-      const enteredPassword = document.getElementById('pw').value;
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    const radius = width / 3;
 
-      if (enteredPassword === correctPassword) {
-        // Hide login and show mindmap
-        document.getElementById('login').style.display = 'none';
-        document.getElementById('mindmap-container').style.display = 'block';
-        loadMindmapData();
-      } else {
-        alert("Incorrect password");
-      }
-    }
+    const svg = d3.select("#mindmap")
+      .attr("width", width)
+      .attr("height", height)
+      .append("g")
+      .attr("transform", `translate(${width / 2}, ${height / 2})`);
 
-    // Load and Render Mindmap
-    function loadMindmapData() {
-      const width = window.innerWidth;
-      const height = window.innerHeight;
-      const radius = width / 3;
+    const tooltip = d3.select("#tooltip");
 
-      const svg = d3.select("#mindmap")
-        .attr("width", width)
-        .attr("height", height)
-        .append("g")
-        .attr("transform", `translate(${width / 2}, ${height / 2})`);
-
-      const tooltip = d3.select("#tooltip");
-
-      fetch("mindmap_data_synced.json")
-        .then(res => res.json())
-        .then(data => {
-          const root = {
-            name: "Steed Media",
-            children: Object.entries(data).map(([category, services]) => ({
-              name: category,
-              icon: services[0]?.icon || "🧩",
-              children: services.map(s => ({
-                name: s.service,
-                username: s.username,
-                description: s.description,
-                password: s.password,
-                notes: s.notes
-              }))
+    fetch("mindmap_data_synced.json")
+      .then(res => res.json())
+      .then(data => {
+        const root = {
+          name: "Steed Media",
+          children: Object.entries(data).map(([category, services]) => ({
+            name: category,
+            icon: services[0]?.icon || "🧩",
+            children: services.map(s => ({
+              name: s.service,
+              username: s.username,
+              description: s.description,
+              password: s.password,
+              notes: s.notes
             }))
-          };
+          }))
+        };
 
-          const rootNode = d3.hierarchy(root);
-          const treeLayout = d3.tree().size([2 * Math.PI, radius]);
-          treeLayout(rootNode);
+        const rootNode = d3.hierarchy(root);
+        const treeLayout = d3.tree().size([2 * Math.PI, radius]);
+        treeLayout(rootNode);
 
-          const link = svg.selectAll(".link")
-            .data(rootNode.links())
-            .join("path")
-            .attr("class", "link")
-            .attr("d", d3.linkRadial()
-              .angle(d => d.x)
-              .radius(d => d.y)
-            );
+        const link = svg.selectAll(".link")
+          .data(rootNode.links())
+          .join("path")
+          .attr("class", "link")
+          .attr("d", d3.linkRadial()
+            .angle(d => d.x)
+            .radius(d => d.y)
+          );
 
-          const node = svg.selectAll(".node")
-            .data(rootNode.descendants())
-            .join("g")
-            .attr("class", "node")
-            .attr("transform", d => `rotate(${d.x * 180 / Math.PI - 90}) translate(${d.y},0)`);
+        const node = svg.selectAll(".node")
+          .data(rootNode.descendants())
+          .join("g")
+          .attr("class", "node")
+          .attr("transform", d => `rotate(${d.x * 180 / Math.PI - 90}) translate(${d.y},0)`);
 
-          node.append("circle")
-            .attr("r", 5)
-            .on("mouseover", (e, d) => {
-              if (d.data.username || d.data.password || d.data.notes) {
-                tooltip.style("display", "block")
-                  .html(`<strong>${d.data.name}</strong><br>
-                         <b>User:</b> ${d.data.username || '-'}<br>
-                         <b>Pass:</b> ${d.data.password || '-'}<br>
-                         <b>Notes:</b> ${d.data.notes || '-'}`)
-                  .style("left", (e.pageX + 10) + "px")
-                  .style("top", (e.pageY - 28) + "px");
-              }
-            })
-            .on("mouseout", () => tooltip.style("display", "none"));
+        node.append("circle")
+          .attr("r", 5)
+          .on("mouseover", (e, d) => {
+            if (d.data.username || d.data.password || d.data.notes) {
+              tooltip.style("display", "block")
+                .html(`<strong>${d.data.name}</strong><br>
+                       <b>User:</b> ${d.data.username || '-'}<br>
+                       <b>Pass:</b> ${d.data.password || '-'}<br>
+                       <b>Notes:</b> ${d.data.notes || '-'}`)
+                .style("left", (e.pageX + 10) + "px")
+                .style("top", (e.pageY - 28) + "px");
+            }
+          })
+          .on("mouseout", () => tooltip.style("display", "none"));
 
-          node.append("text")
-            .attr("dy", "0.31em")
-            .attr("x", d => d.x < Math.PI === !d.children ? 8 : -8)
-            .attr("text-anchor", d => d.x < Math.PI === !d.children ? "start" : "end")
-            .attr("transform", d => d.x >= Math.PI ? "rotate(180)" : null)
-            .text(d => d.data.icon ? `${d.data.icon} ${d.data.name}` : d.data.name);
-        });
-    }
-  </script>
-</body>
-</html>
+        node.append("text")
+          .attr("dy", "0.31em")
+          .attr("x", d => d.x < Math.PI === !d.children ? 8 : -8)
+          .attr("text-anchor", d => d.x < Math.PI === !d.children ? "start" : "end")
