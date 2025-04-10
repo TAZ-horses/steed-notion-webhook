@@ -26,6 +26,8 @@ def get_property_value(prop, prop_type='text'):
             return prop['title'][0]['plain_text'] if prop.get('title') else ''
         elif prop_type == 'select':
             return prop['select']['name'] if prop.get('select') else 'Uncategorized'
+        elif prop_type == 'multi_select':
+            return [tag['name'] for tag in prop.get('multi_select', [])]
         return ''
     except (KeyError, IndexError, TypeError) as e:
         logger.warning(f"Property parse error: {e}")
@@ -59,12 +61,17 @@ def parse_notion_data(pages):
             category = get_property_value(props.get("Category", {}), 'select') or "Uncategorized"
             icon = CATEGORY_ICONS.get(category, "🧩")
 
+            # Handle notes - make sure it's populated properly
+            notes = get_property_value(props.get("Notes", {}), 'text')
+            if not notes:
+                notes = "No additional notes available."
+
             entry = {
                 "service": service,
                 "description": get_property_value(props.get("Description", {}), 'text'),
                 "username": get_property_value(props.get("Username", {}), 'text'),
                 "password": get_property_value(props.get("Password", {}), 'text'),
-                "notes": get_property_value(props.get("Notes", {}), 'text'),
+                "notes": notes,  # Ensure notes are included
                 "icon": icon
             }
 
