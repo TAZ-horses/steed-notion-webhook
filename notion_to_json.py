@@ -2,24 +2,39 @@ import os
 import json
 from notion_client import Client
 from dotenv import load_dotenv
-
-# Set up logging
 import logging
+
+# Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 # Category icons (customize as needed)
 CATEGORY_ICONS = {
     "Hosting": "🌐",
-    "Development": "💻", 
+    "Development": "💻",
     "Social Media": "📱",
     "Business Tools": "🧰",
-    "Design": "🎨",
     "Uncategorized": "🧩"
 }
 
+def sanitize_data(data):
+    """Remove or mask sensitive fields before saving to JSON"""
+    for category in data.values():
+        for entry in category:
+            # Always mask passwords
+            if 'password' in entry:
+                entry['password'] = '••••••••' if entry['password'] else '[NONE]'
+            
+            # Redact notes containing sensitive keywords
+            sensitive_keywords = ['password', 'key', 'secret', 'token', 'login']
+            if 'notes' in entry:
+                notes_lower = entry['notes'].lower()
+                if any(keyword in notes_lower for keyword in sensitive_keywords):
+                    entry['notes'] = '[REDACTED - CONTAINS SENSITIVE INFO]'
+    return data
+
 def get_property_value(prop, prop_type='text'):
-    """Safely extract Notion property values."""
+    """Safely extract Notion property values"""
     try:
         if not prop:
             return ''
@@ -31,11 +46,11 @@ def get_property_value(prop, prop_type='text'):
             return prop['select']['name'] if prop.get('select') else 'Uncategorized'
         return ''
     except Exception as e:
-        logger.warning(f"Failed to parse property: {e}")
+        logger.warning(f"Property parse error: {e}")
         return ''
 
 def fetch_notion_database(database_id, notion):
-    """Fetch all pages from a Notion database."""
+    """Fetch all pages from Notion database"""
     results = []
     next_cursor = None
     
@@ -57,7 +72,7 @@ def fetch_notion_database(database_id, notion):
     return results
 
 def transform_data(pages):
-    """Convert Notion pages to structured mindmap data."""
+    """Convert Notion pages to structured data"""
     structured_data = {}
     
     for page in pages:
@@ -74,8 +89,8 @@ def transform_data(pages):
                 'service': service,
                 'description': get_property_value(props.get('Description'), 'text'),
                 'username': get_property_value(props.get('Username'), 'text'),
-                'password': get_property_value(props.get('Password'), 'text'), 
-                'notes': get_property_value(props.get('Notes'), 'text'),
+                'password': get_property_value(props.get('Password'), 'text'),  # Will be sanitized later
+                'notes': get_property_value(props.get('Notes'), 'text'),       # Will be sanitized later
                 'icon': icon
             }
             
@@ -90,7 +105,7 @@ def transform_data(pages):
     return structured_data
 
 def main():
-    """Main execution flow."""
+    """Main execution flow"""
     load_dotenv()
     
     notion_token = os.getenv('NOTION_TOKEN')
@@ -105,12 +120,18 @@ def main():
         pages = fetch_notion_database(database_id, notion)
         mindmap_data = transform_data(pages)
         
-        # Write to docs/ for GitHub Pages
-        output_path = os.path.join('docs', 'mindmap_data.json')
-        with open(output_path, 'w') as f:
-            json.dump(mindmap_data, f, indent=2)
+        # Sanitize sensitive data before saving
+        sanitized_data = sanitize_data(mindmap_data)
         
-        logger.info(f"Successfully wrote {output_path}")
+        # Write to output directory
+        output_dir = 'docs'  # Change to 'public' if using Netlify
+        os.makedirs(output_dir, exist_ok=True)
+        
+        output_path = os.path.join(output_dir, 'mindmap_data.json')
+        with open(output_path, 'w') as f:
+            json.dump(sanitized_data, f, indent=2)
+        
+        logger.info(f"Successfully wrote sanitized data to {output_path}")
         
     except Exception as e:
         logger.error(f"Critical error: {e}")
