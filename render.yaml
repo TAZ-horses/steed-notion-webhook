@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: steed-webhook-app
+    env: python
+    plan: free
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "python webhook_app.py"
+    envVars:
+      - key: GITHUB_REPO
+        value: yourusername/your-repo
+      - key: GITHUB_TOKEN
+        value: your_token_here
