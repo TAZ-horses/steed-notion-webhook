@@ -61,17 +61,22 @@ def parse_notion_data(pages):
             category = get_property_value(props.get("Category", {}), 'select') or "Uncategorized"
             icon = CATEGORY_ICONS.get(category, "🧩")
 
-            # Handle notes - make sure it's populated properly
+            # Handle description - ensure it's properly handled
+            description = get_property_value(props.get("Description", {}), 'text')
+            if not description:
+                description = "No description available."
+
+            # Handle notes - ensure it's properly handled
             notes = get_property_value(props.get("Notes", {}), 'text')
             if not notes:
                 notes = "No additional notes available."
 
             entry = {
                 "service": service,
-                "description": get_property_value(props.get("Description", {}), 'text'),
+                "description": description,  # Now handling description
                 "username": get_property_value(props.get("Username", {}), 'text'),
                 "password": get_property_value(props.get("Password", {}), 'text'),
-                "notes": notes,  # Ensure notes are included
+                "notes": notes,  # Ensuring notes are included
                 "icon": icon
             }
 
