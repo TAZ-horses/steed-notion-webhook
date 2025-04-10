@@ -19,7 +19,7 @@
     }
     #mindmap {
       width: 100vw;
-      height: 80vh;
+      height: 100vh;
       overflow: auto;
       margin: 0 auto;
       display: block;
@@ -88,7 +88,7 @@
               username: s.username,
               description: s.description,
               password: s.password,
-              notes: s.notes
+              notes: s.notes || "No notes available"
             }))
           }))
         };
@@ -120,7 +120,7 @@
                 .html(`<strong>${d.data.name}</strong><br>
                        <b>User:</b> ${d.data.username || '-'}<br>
                        <b>Pass:</b> ${d.data.password || '-'}<br>
-                       <b>Notes:</b> ${d.data.notes || '-'}`)
+                       <b>Notes:</b> ${d.data.notes || 'No notes available'}`)
                 .style("left", (e.pageX + 10) + "px")
                 .style("top", (e.pageY - 28) + "px");
             }
@@ -131,3 +131,9 @@
           .attr("dy", "0.31em")
           .attr("x", d => d.x < Math.PI === !d.children ? 8 : -8)
           .attr("text-anchor", d => d.x < Math.PI === !d.children ? "start" : "end")
+          .attr("transform", d => d.x >= Math.PI ? "rotate(180)" : null)
+          .text(d => d.data.icon ? `${d.data.icon} ${d.data.name}` : d.data.name);
+      });
+  </script>
+</body>
+</html>
