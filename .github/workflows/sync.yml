@@ -2,16 +2,20 @@ name: Sync Notion Data
 on:
   schedule:
     - cron: '0 * * * *'  # Runs hourly
-  workflow_dispatch:     # Manual trigger option
+  workflow_dispatch:
 
 jobs:
   sync:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write    # Required to push changes
-
     steps:
       - uses: actions/checkout@v4
+      
+      - name: Debug - Show files
+        run: |
+          echo "=== Current directory structure ==="
+          ls -R
+          echo "=== Script should be in scripts/ ==="
+          ls -la scripts/
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -21,18 +25,21 @@ jobs:
       - name: Install dependencies
         run: pip install notion-client python-dotenv
 
-      - name: Debug - Show files
-        run: |
-          echo "=== Repository contents ==="
-          ls -la
-          echo "=== Scripts folder ==="
-          ls -la scripts/
-
       - name: Run Notion sync
         env:
           NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
           NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
-        run: python scripts/notion_to_json.py
+        run: |
+          # Try both possible locations
+          if [ -f "scripts/notion_to_json.py" ]; then
+            python scripts/notion_to_json.py
+          elif [ -f "notion_to_json.py" ]; then
+            python notion_to_json.py
+          else
+            echo "Error: Could not find notion_to_json.py"
+            ls -R
+            exit 1
+          fi
 
       - name: Commit and push
         run: |
