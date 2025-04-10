@@ -1,8 +1,8 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Steed Media Mindmap</title>
   <style>
     body {
@@ -11,35 +11,43 @@
       background: #f4f4f4;
       color: #2a423f;
     }
+
     h1 {
       text-align: center;
       color: #ee0505;
       margin-top: 30px;
       font-size: 2em;
     }
+
     #mindmap {
       width: 100vw;
       height: 100vh;
-      overflow: auto;
-      margin: 0 auto;
+      overflow: hidden;
       display: block;
     }
+
     .node circle {
       fill: #2a423f;
       stroke: #fff;
       stroke-width: 2px;
+      transition: all 0.3s ease;
     }
+
     .node text {
       font-size: 14px;
-      fill: #2a423f;
+      fill: #fff;
       pointer-events: none;
+      transition: all 0.3s ease;
     }
+
     .link {
       fill: none;
       stroke: #ccc;
       stroke-opacity: 0.5;
       stroke-width: 2px;
+      transition: all 0.3s ease;
     }
+
     .tooltip {
       position: absolute;
       background: white;
@@ -47,12 +55,17 @@
       border: 1px solid #ccc;
       font-size: 13px;
       display: none;
-    }
-    .node rect {
-      fill: #ffe031;
-      stroke: #2a423f;
-      stroke-width: 1px;
+      box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
       border-radius: 5px;
+    }
+
+    .node:hover circle {
+      fill: #ee0505;
+      cursor: pointer;
+    }
+
+    .node:hover text {
+      fill: #fff;
     }
   </style>
 </head>
@@ -88,7 +101,8 @@
               username: s.username,
               description: s.description,
               password: s.password,
-              notes: s.notes || "No notes available"
+              notes: s.notes,
+              icon: s.icon || "🧩"
             }))
           }))
         };
@@ -113,14 +127,16 @@
           .attr("transform", d => `rotate(${d.x * 180 / Math.PI - 90}) translate(${d.y},0)`);
 
         node.append("circle")
-          .attr("r", 5)
+          .attr("r", 6)
           .on("mouseover", (e, d) => {
             if (d.data.username || d.data.password || d.data.notes) {
               tooltip.style("display", "block")
-                .html(`<strong>${d.data.name}</strong><br>
-                       <b>User:</b> ${d.data.username || '-'}<br>
-                       <b>Pass:</b> ${d.data.password || '-'}<br>
-                       <b>Notes:</b> ${d.data.notes || 'No notes available'}`)
+                .html(`
+                  <strong>${d.data.name}</strong><br>
+                  <b>User:</b> ${d.data.username || '-'}<br>
+                  <b>Pass:</b> ${d.data.password || '-'}<br>
+                  <b>Notes:</b> ${d.data.notes || '-'}
+                `)
                 .style("left", (e.pageX + 10) + "px")
                 .style("top", (e.pageY - 28) + "px");
             }
