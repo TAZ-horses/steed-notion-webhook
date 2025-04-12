@@ -1,0 +1,7 @@
+services:
+  - type: static
+    name: steed-mindmap
+    env: static
+    branch: main
+    buildCommand: ""
+    staticPublishPath: docs
