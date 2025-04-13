@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -287,7 +287,7 @@
       svg.on("click", () => tooltip.style("display", "none"));
     }
 
-    fetch("docs/mindmap_data.json?t=" + Date.now())
+    fetch("mindmap_data.json?t=" + Date.now())
       .then(res => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         return res.json();
