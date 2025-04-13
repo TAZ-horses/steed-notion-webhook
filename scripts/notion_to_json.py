@@ -1,13 +1,15 @@
-iimport os
+import os
 import json
+import sys
 from notion_client import Client
 from dotenv import load_dotenv
 
-# Load environment variables from .env
+# Load environment variables
 load_dotenv()
 
-# Initialize Notion client
+# Setup Notion client
 notion = Client(auth=os.getenv("NOTION_TOKEN"))
+database_id = os.getenv("NOTION_DATABASE_ID")
 
 def fetch_notion_data(database_id):
     try:
@@ -28,22 +30,28 @@ def fetch_notion_data(database_id):
     except Exception as e:
         print(f"[❌] Notion fetch error: {e}")
         return {}
-print(json.dumps(data, indent=2))
-import sys
 
-output_file = "docs/mindmap_data.json"
-if "--output" in sys.argv:
-    i = sys.argv.index("--output")
-    if i + 1 < len(sys.argv):
-        output_file = sys.argv[i + 1]
-
-save_json(data, path=output_file)
+def save_json(data, path="docs/mindmap_data.json"):
+    try:
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, "w") as f:
+            json.dump(data, f, indent=2)
+        print(f"[✅] mindmap_data.json updated at {path}")
+    except Exception as e:
+        print(f"[❌] Failed to write JSON: {e}")
 
 if __name__ == "__main__":
-    db_id = os.getenv("NOTION_DATABASE_ID")
-    if not db_id:
-        print("[❌] NOTION_DATABASE_ID is not set in the environment variables.")
+    if not database_id:
+        print("[❌] NOTION_DATABASE_ID is not set in environment variables.")
         exit(1)
 
-    data = fetch_notion_data(db_id)
-    save_json(data)
+    # Get optional output path
+    output_file = "docs/mindmap_data.json"
+    if "--output" in sys.argv:
+        i = sys.argv.index("--output")
+        if i + 1 < len(sys.argv):
+            output_file = sys.argv[i + 1]
+
+    data = fetch_notion_data(database_id)
+    print(json.dumps(data, indent=2))  # Optional: For debug visibility
+    save_json(data, path=output_file)
