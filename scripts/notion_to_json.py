@@ -5,7 +5,6 @@ from notion_client import Client
 from dotenv import load_dotenv
 
 load_dotenv()
-
 notion = Client(auth=os.getenv("NOTION_TOKEN"))
 
 def fetch_notion_data(database_id):
@@ -28,26 +27,26 @@ def fetch_notion_data(database_id):
         print(f"[❌] Notion fetch error: {e}")
         return {}
 
-def save_json(data, path):
+def save_json(data, path="docs/mindmap_data.json"):
     try:
         os.makedirs(os.path.dirname(path), exist_ok=True)
         with open(path, "w") as f:
             json.dump(data, f, indent=2)
-        print(f"[✅] Saved to {path}")
+        print(f"[✅] mindmap_data.json updated at {path}")
     except Exception as e:
-        print(f"[❌] Failed to write file: {e}")
+        print(f"[❌] Failed to write JSON: {e}")
 
 if __name__ == "__main__":
     db_id = os.getenv("NOTION_DATABASE_ID")
     if not db_id:
-        print("[❌] NOTION_DATABASE_ID not set.")
+        print("[❌] NOTION_DATABASE_ID is not set in the environment variables.")
         exit(1)
 
     output_file = "docs/mindmap_data.json"
     if "--output" in sys.argv:
-        idx = sys.argv.index("--output")
-        if idx + 1 < len(sys.argv):
-            output_file = sys.argv[idx + 1]
+        i = sys.argv.index("--output")
+        if i + 1 < len(sys.argv):
+            output_file = sys.argv[i + 1]
 
     data = fetch_notion_data(db_id)
-    save_json(data, output_file)
+    save_json(data, path=output_file)
