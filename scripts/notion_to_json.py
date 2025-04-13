@@ -4,8 +4,10 @@ import json
 from notion_client import Client
 from dotenv import load_dotenv
 
+# Load environment variables from .env
 load_dotenv()
 
+# Initialize Notion client
 notion = Client(auth=os.getenv("NOTION_TOKEN"))
 
 def fetch_notion_data(database_id):
