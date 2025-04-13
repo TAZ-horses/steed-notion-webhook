@@ -149,12 +149,10 @@
       "social media": "📱"
     };
 
-    // Visualization setup
     const width = window.innerWidth;
     const height = window.innerHeight;
     const radius = Math.min(width, height) / 2.2;
 
-    // Create loading overlay
     const loading = d3.select("body").append("div")
       .attr("class", "loading-overlay")
       .text("Loading mindmap...");
@@ -173,13 +171,6 @@
     const tooltip = d3.select("#tooltip");
     let allPasswordsVisible = false;
 
-    // Password strength indicator
-    function getPasswordStrength(pwd) {
-      if (!pwd) return 0;
-      return Math.min(10, pwd.length * (pwd.match(/[^a-zA-Z]/) ? 1.5 : 1));
-    }
-
-    // Password toggle function
     function toggleAllPasswords() {
       allPasswordsVisible = !allPasswordsVisible;
       document.querySelectorAll(".password-field").forEach(span => {
@@ -189,7 +180,6 @@
       toggleBtn.textContent = allPasswordsVisible ? "🔒 Hide Passwords" : "🔓 Show Passwords";
     }
 
-    // Export as PNG
     function exportAsPNG() {
       const svgEl = document.getElementById("mindmap");
       const svgData = new XMLSerializer().serializeToString(svgEl);
@@ -211,7 +201,6 @@
       img.src = "data:image/svg+xml;base64," + btoa(unescape(encodeURIComponent(svgData)));
     }
 
-    // Main rendering function
     function renderMindmap(data) {
       const root = {
         name: "Steed Media",
@@ -233,7 +222,6 @@
       const tree = d3.tree().size([2 * Math.PI, radius]);
       tree(rootNode);
 
-      // Draw links
       svg.selectAll(".link")
         .data(rootNode.links())
         .join("path")
@@ -243,19 +231,16 @@
           .radius(d => d.y)
         );
 
-      // Create nodes
       const node = svg.selectAll(".node")
         .data(rootNode.descendants())
         .join("g")
         .attr("class", "node")
         .attr("transform", d => `rotate(${(d.x * 180 / Math.PI - 90)}) translate(${d.y},0)`);
 
-      // Add circles to nodes
       node.append("circle")
         .attr("r", 5)
         .attr("fill", d => d.data.color || "#2a423f");
 
-      // Add text to nodes
       node.append("text")
         .attr("dy", "0.31em")
         .attr("x", d => d.x < Math.PI === !d.children ? 10 : -10)
@@ -265,7 +250,6 @@
         .append("title")
         .text(d => d.data.name);
 
-      // Node click handler
       node.on("click", (event, d) => {
         if (d.data.username || d.data.password || d.data.notes || d.data.description) {
           const strength = getPasswordStrength(d.data.password);
@@ -288,7 +272,6 @@
             .style("left", (event.pageX + 10) + "px")
             .style("top", (event.pageY - 20) + "px");
 
-          // Add click handler for copy button
           if (d.data.password) {
             tooltip.select(".copy-btn").on("click", function() {
               navigator.clipboard.writeText(d.data.password)
@@ -301,11 +284,9 @@
         }
       });
 
-      // Hide tooltip when clicking elsewhere
       svg.on("click", () => tooltip.style("display", "none"));
     }
 
-    // Load data and render mindmap
     fetch("docs/mindmap_data.json?t=" + Date.now())
       .then(res => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -320,6 +301,11 @@
       .finally(() => {
         setTimeout(() => loading.remove(), 3000);
       });
+
+    function getPasswordStrength(pwd) {
+      if (!pwd) return 0;
+      return Math.min(10, pwd.length * (pwd.match(/[^a-zA-Z]/) ? 1.5 : 1));
+    }
   </script>
 </body>
 </html>
