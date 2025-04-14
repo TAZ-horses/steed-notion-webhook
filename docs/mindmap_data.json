@@ -1,1 +1,101 @@
-{}
+{
+  "Hosting": [
+    {
+      "service": "fred",
+      "username": "john",
+      "password": "dffff",
+      "notes": "",
+      "description": "barnaby"
+    },
+    {
+      "service": "dreamhost.com",
+      "username": "steedmedialtd@barnaby",
+      "password": "@Tontoroki2",
+      "notes": "",
+      "description": "Host your @"
+    },
+    {
+      "service": "fasthost.co.uk",
+      "username": "web.development@steedmedia.co.uk",
+      "password": "33kvdR2i3T!gNxB",
+      "notes": "",
+      "description": "Hosts your Domains "
+    }
+  ],
+  "business tools": [
+    {
+      "service": "bing.com",
+      "username": "steedmedialtd@gmail.com",
+      "password": "Monty42sultan",
+      "notes": "",
+      "description": "Bing listing of business on seach engine"
+    },
+    {
+      "service": "google.com",
+      "username": "steedmedialtd@gmail.com",
+      "password": "Monty42sultan",
+      "notes": "",
+      "description": "Gmail account which hosts youtube and backend development."
+    },
+    {
+      "service": "squareonline.com",
+      "username": "cox5855@gmail.com",
+      "password": "Monty42sultan",
+      "notes": "",
+      "description": "hosts your website steedmedia.co.uk"
+    },
+    {
+      "service": "docusign.com",
+      "username": "web.developments@steedmedia.co.uk",
+      "password": "@Tontoroki2",
+      "notes": "",
+      "description": "Digital contracts and signatures"
+    }
+  ],
+  "development": [
+    {
+      "service": "github.com",
+      "username": "TAZ-horses",
+      "password": "@Tontoroki22",
+      "notes": "",
+      "description": "Code repository for website all embeded content for quick loading"
+    },
+    {
+      "service": "openai.com",
+      "username": "steed",
+      "password": "[ Add ]",
+      "notes": "",
+      "description": "AI tools and API access"
+    }
+  ],
+  "social media": [
+    {
+      "service": "flickr.com",
+      "username": "web.developments@steedmedia.co.uk",
+      "password": "@Tontoroki22",
+      "notes": "",
+      "description": "Photo sharing & hosting"
+    },
+    {
+      "service": "instagram.com",
+      "username": "steedmedia_Ltd",
+      "password": "@Tontoroki2",
+      "notes": "",
+      "description": "Visual portfolio and updates"
+    },
+    {
+      "service": "linkedin.com",
+      "username": "cox5855@gmail.com",
+      "password": "Monty42sultan",
+      "notes": "",
+      "description": "Professional profile & networking"
+    },
+    {
+      "service": "Facebook.com",
+      "username": "07980474830",
+      "password": "@Tontoroki2",
+      "notes": "",
+      "description": "Social media page for Steed Media"
+    }
+  ]
+}
