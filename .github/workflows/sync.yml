@@ -2,49 +2,52 @@ name: Sync Notion Data
 
 on:
   schedule:
-    - cron: '*/5 * * * *'  # Every 5 minutes (for testing)
-  workflow_dispatch:
+    - cron: '*/15 * * * *'  # Runs every 15 minutes (adjust as needed)
+  workflow_dispatch:        # Allows manual triggering from GitHub UI
 
 jobs:
   sync:
+    name: Sync Notion to JSON
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: write  # Required to push updates to the repo
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 0  # Full history for rebase
 
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
 
-      - name: Install dependencies
+      - name: Install Python dependencies
         run: |
           pip install notion-client python-dotenv
 
-      - name: Run Notion sync
+      - name: Run Notion to JSON sync
         env:
           NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
           NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
         run: |
           python scripts/notion_to_json.py --output docs/mindmap_data.json
+          echo "" > docs/.nojekyll
 
-      - name: Add nojekyll file
-        run: echo "" > docs/.nojekyll
-
-      - name: Commit and push changes
+      - name: Commit and push if data has changed
         run: |
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
+          git stash
           git pull --rebase origin main
-          git add docs/mindmap_data.json
+          git stash pop || true
+          git add docs/mindmap_data.json docs/.nojekyll
+
           if git diff --cached --quiet; then
-            echo "No changes to commit"
+            echo "✅ No changes to commit"
           else
             git commit -m "Auto-update mindmap data [skip ci]"
             git push
+            echo "✅ Changes pushed to repository"
           fi
