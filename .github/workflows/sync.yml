@@ -2,52 +2,45 @@ name: Sync Notion Data
 
 on:
   schedule:
-    - cron: '*/15 * * * *'  # Runs every 15 minutes (adjust as needed)
-  workflow_dispatch:        # Allows manual triggering from GitHub UI
+    - cron: '*/15 * * * *'  # Every 15 minutes
+  workflow_dispatch:
 
 jobs:
   sync:
-    name: Sync Notion to JSON
     runs-on: ubuntu-latest
     permissions:
-      contents: write  # Required to push updates to the repo
+      contents: write  # Needed for git push
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Full history for rebase
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
 
-      - name: Install Python dependencies
-        run: |
-          pip install notion-client python-dotenv
+      - name: Install dependencies
+        run: pip install notion-client python-dotenv
 
-      - name: Run Notion to JSON sync
+      - name: Run Notion sync
         env:
           NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
           NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
-        run: |
-          python scripts/notion_to_json.py --output docs/mindmap_data.json
-          echo "" > docs/.nojekyll
+        run: python scripts/notion_to_json.py --output docs/mindmap_data.json
 
-      - name: Commit and push if data has changed
+      - name: Add .nojekyll (for GitHub Pages)
+        run: echo "" > docs/.nojekyll
+
+      - name: Commit and push changes
         run: |
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
-          git stash
-          git pull --rebase origin main
-          git stash pop || true
           git add docs/mindmap_data.json docs/.nojekyll
-
           if git diff --cached --quiet; then
             echo "✅ No changes to commit"
           else
             git commit -m "Auto-update mindmap data [skip ci]"
             git push
-            echo "✅ Changes pushed to repository"
-          fi
