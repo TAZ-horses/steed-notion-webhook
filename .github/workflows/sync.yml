@@ -45,6 +45,6 @@ jobs:
             echo "✅ No changes to commit"
           else
             git commit -m "Auto-update mindmap data [skip ci]"
-            # Force push to ensure the runner’s commit updates the remote branch
-            git push --force-with-lease
+            git fetch origin main
+            git push --force
           fi
