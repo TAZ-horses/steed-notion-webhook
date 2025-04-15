@@ -1,11 +1,4 @@
 services:
-  - type: static
-    name: steed-mindmap
-    env: static
-    branch: main
-    buildCommand: ""
-    staticPublishPath: docs
-
   - type: web
     name: steed-notion-webhook
     env: python
