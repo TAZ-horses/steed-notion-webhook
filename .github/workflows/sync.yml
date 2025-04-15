@@ -31,7 +31,7 @@ jobs:
           NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
           NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
         run: |
-          python scripts/notion_to_json.py --output docs/mindmap_data.json
+          python scripts/sync_notion.py --output docs/mindmap_data.json
 
       - name: Add .nojekyll file
         run: echo "" > docs/.nojekyll
