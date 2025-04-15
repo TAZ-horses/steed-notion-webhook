@@ -4,307 +4,106 @@
   <meta charset="UTF-8">
   <title>Steed Media Mindmap</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Load D3.js -->
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <style>
-    html, body {
+    body {
       margin: 0;
       padding: 0;
-      overflow: hidden;
       font-family: 'Instrument Sans', sans-serif;
       background: #f4f4f4;
     }
-    
-    #mindmap {
-      width: 100vw;
-      height: 100vh;
-    }
-    
-    .node circle {
-      stroke: #fff;
-      stroke-width: 2px;
-    }
-    
-    .node text {
-      font-size: 12px;
-      fill: #2a423f;
-      user-select: none;
-    }
-    
-    .link {
-      fill: none;
-      stroke: #bbb;
-      stroke-opacity: 0.5;
-      stroke-width: 1.5px;
-    }
-    
-    .tooltip {
-      position: absolute;
-      background: #fff;
-      border: 1px solid #ccc;
-      padding: 10px;
-      font-size: 13px;
-      pointer-events: none;
-      display: none;
-      z-index: 10;
-      max-width: 300px;
-      border-radius: 8px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
-    
-    #toolbar {
-      position: fixed;
-      top: 10px;
-      right: 10px;
-      background: #ffffffcc;
-      backdrop-filter: blur(8px);
-      border: 1px solid #ccc;
-      padding: 10px;
-      border-radius: 8px;
-      z-index: 100;
-      font-size: 14px;
+    /* Style for the password prompt screen */
+    #login {
       display: flex;
-      gap: 10px;
-    }
-    
-    #toolbar button {
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
       background: #2a423f;
       color: white;
-      border: none;
-      padding: 6px 10px;
-      border-radius: 4px;
+    }
+    #login input {
+      padding: 8px;
+      font-size: 16px;
+      margin: 10px;
+    }
+    #login button {
+      padding: 8px 16px;
+      font-size: 16px;
       cursor: pointer;
     }
-    
-    #toolbar button:hover {
-      background: #ee0505;
-    }
-    
-    .copy-btn {
-      background: none;
-      border: none;
-      cursor: pointer;
-      margin-left: 5px;
-      font-size: 12px;
-      padding: 2px 5px;
-      border-radius: 3px;
-      background: #f0f0f0;
-    }
-    
-    .copy-btn:hover {
-      background: #ddd;
-    }
-    
-    .loading-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      padding: 20px;
-      background: #2a423f;
-      color: white;
-      text-align: center;
-      z-index: 1000;
-    }
-    
-    .error-overlay {
-      background: #ee0505;
-    }
-    
-    .strength-meter {
-      height: 4px;
-      background: linear-gradient(to right, #ee0505, #f39c12, #2a423f);
-      margin-top: 4px;
-      border-radius: 2px;
+    /* Mindmap container is hidden until the correct password is entered */
+    #mindmap-container {
+      display: none;
     }
   </style>
 </head>
 <body>
-  <!-- Visualization Container -->
-  <svg id="mindmap"></svg>
-  
-  <!-- Tooltip -->
-  <div id="tooltip" class="tooltip"></div>
-  
-  <!-- Toolbar -->
-  <div id="toolbar">
-    <button onclick="toggleAllPasswords()">🔓 Show Passwords</button>
-    <button onclick="exportAsPNG()">📷 Export Map</button>
-    <button onclick="location.reload()">🔄 Reload</button>
+  <!-- Password Prompt -->
+  <div id="login">
+    <h2>Enter Password to Access Mindmap</h2>
+    <input type="password" id="password" placeholder="Password">
+    <button onclick="checkPassword()">Unlock</button>
   </div>
 
-  <!-- JavaScript -->
+  <!-- Mindmap Viewer -->
+  <div id="mindmap-container">
+    <svg id="mindmap"></svg>
+  </div>
+
   <script>
-    // Color and icon mappings
-    const colorMap = {
-      "business tools": "#2a423f",
-      "Hosting": "#ee0505",
-      "development": "#007bff",
-      "social media": "#f39c12"
-    };
+    // Set your password here:
+    const correctPassword = "yourStrongPassword"; // Change this to your desired password
 
-    const iconMap = {
-      "business tools": "💼",
-      "Hosting": "🌐",
-      "development": "💻",
-      "social media": "📱"
-    };
-
-    const width = window.innerWidth;
-    const height = window.innerHeight;
-    const radius = Math.min(width, height) / 2.2;
-
-    const loading = d3.select("body").append("div")
-      .attr("class", "loading-overlay")
-      .text("Loading mindmap...");
-
-    const container = d3.select("#mindmap")
-      .attr("width", width)
-      .attr("height", height);
-
-    const svg = container.append("g")
-      .attr("transform", `translate(${width / 2}, ${height / 2})`);
-
-    container.call(d3.zoom().scaleExtent([0.5, 4]).on("zoom", (e) => {
-      svg.attr("transform", e.transform);
-    }));
-
-    const tooltip = d3.select("#tooltip");
-    let allPasswordsVisible = false;
-
-    function toggleAllPasswords() {
-      allPasswordsVisible = !allPasswordsVisible;
-      document.querySelectorAll(".password-field").forEach(span => {
-        span.textContent = allPasswordsVisible ? span.dataset.pass : "••••••";
-      });
-      const toggleBtn = document.querySelector("#toolbar button:first-child");
-      toggleBtn.textContent = allPasswordsVisible ? "🔒 Hide Passwords" : "🔓 Show Passwords";
+    // Check the password from the input
+    function checkPassword() {
+      const input = document.getElementById("password").value;
+      if (input === correctPassword) {
+        document.getElementById("login").style.display = "none";
+        document.getElementById("mindmap-container").style.display = "block";
+        loadMindmap();  // Load the JSON and render the mindmap
+      } else {
+        alert("Incorrect password. Please try again.");
+      }
+      return false;
     }
 
-    function exportAsPNG() {
-      const svgEl = document.getElementById("mindmap");
-      const svgData = new XMLSerializer().serializeToString(svgEl);
-      const canvas = document.createElement("canvas");
-      canvas.width = width;
-      canvas.height = height;
-      const ctx = canvas.getContext("2d");
-      const img = new Image();
-      
-      img.onload = function() {
-        ctx.drawImage(img, 0, 0);
-        const png = canvas.toDataURL("image/png");
-        const link = document.createElement("a");
-        link.download = "steed_mindmap.png";
-        link.href = png;
-        link.click();
-      };
-      
-      img.src = "data:image/svg+xml;base64," + btoa(unescape(encodeURIComponent(svgData)));
+    // Load the JSON data (with a cache busting query param) and render via D3
+    function loadMindmap() {
+      fetch("mindmap_data.json?t=" + Date.now())
+        .then(response => {
+          if (!response.ok) throw new Error("HTTP " + response.status);
+          return response.json();
+        })
+        .then(renderMindmap)
+        .catch(err => console.error("Error loading JSON:", err));
     }
 
+    // A placeholder rendering function (you will need to adjust this to your design)
     function renderMindmap(data) {
-      const root = {
-        name: "Steed Media",
-        children: Object.entries(data).map(([category, services]) => ({
-          name: category,
-          color: colorMap[category] || "#888",
-          icon: iconMap[category] || "📁",
-          children: services.map(s => ({
-            name: s.service,
-            description: s.description,
-            username: s.username,
-            password: s.password,
-            notes: s.notes
-          }))
-        }))
-      };
-
-      const rootNode = d3.hierarchy(root);
-      const tree = d3.tree().size([2 * Math.PI, radius]);
-      tree(rootNode);
-
-      svg.selectAll(".link")
-        .data(rootNode.links())
-        .join("path")
-        .attr("class", "link")
-        .attr("d", d3.linkRadial()
-          .angle(d => d.x)
-          .radius(d => d.y)
-        );
-
-      const node = svg.selectAll(".node")
-        .data(rootNode.descendants())
-        .join("g")
-        .attr("class", "node")
-        .attr("transform", d => `rotate(${(d.x * 180 / Math.PI - 90)}) translate(${d.y},0)`);
-
-      node.append("circle")
-        .attr("r", 5)
-        .attr("fill", d => d.data.color || "#2a423f");
-
-      node.append("text")
-        .attr("dy", "0.31em")
-        .attr("x", d => d.x < Math.PI === !d.children ? 10 : -10)
-        .attr("text-anchor", d => d.x < Math.PI === !d.children ? "start" : "end")
-        .attr("transform", d => d.x >= Math.PI ? "rotate(180)" : null)
-        .text(d => `${d.data.icon || ""} ${d.data.name}`)
-        .append("title")
-        .text(d => d.data.name);
-
-      node.on("click", (event, d) => {
-        if (d.data.username || d.data.password || d.data.notes || d.data.description) {
-          const strength = getPasswordStrength(d.data.password);
-          const passwordContent = d.data.password 
-            ? `<b>Pass:</b> <span class="password-field" data-pass="${d.data.password}">
-                ${allPasswordsVisible ? d.data.password : "••••••"}
-               </span>
-               <button class="copy-btn">📋</button>
-               <div class="strength-meter" style="width:${strength * 10}%"></div><br>`
-            : "";
-
-          tooltip.style("display", "block")
-            .html(`
-              <strong>${d.data.name}</strong><br>
-              ${d.data.description ? `<em>${d.data.description}</em><br>` : ""}
-              ${d.data.username ? `<b>User:</b> ${d.data.username}<br>` : ""}
-              ${passwordContent}
-              ${d.data.notes ? `<b>Notes:</b> ${d.data.notes}` : ""}
-            `)
-            .style("left", (event.pageX + 10) + "px")
-            .style("top", (event.pageY - 20) + "px");
-
-          if (d.data.password) {
-            tooltip.select(".copy-btn").on("click", function() {
-              navigator.clipboard.writeText(d.data.password)
-                .then(() => {
-                  this.textContent = "✓";
-                  setTimeout(() => this.textContent = "📋", 1000);
-                });
-            });
-          }
-        }
-      });
-
-      svg.on("click", () => tooltip.style("display", "none"));
-    }
-
-    fetch("mindmap_data.json?t=" + Date.now())
-      .then(res => {
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        return res.json();
-      })
-      .then(renderMindmap)
-      .catch(err => {
-        console.error("Fetch failed:", err);
-        loading.classed("error-overlay", true)
-          .html(`<strong>Error:</strong> ${err.message}`);
-      })
-      .finally(() => {
-        setTimeout(() => loading.remove(), 3000);
-      });
-
-    function getPasswordStrength(pwd) {
-      if (!pwd) return 0;
-      return Math.min(10, pwd.length * (pwd.match(/[^a-zA-Z]/) ? 1.5 : 1));
+      const width = window.innerWidth, height = window.innerHeight;
+      const svg = d3.select("#mindmap").attr("width", width).attr("height", height);
+      svg.selectAll("*").remove();  // Clear previous rendering
+      // For demonstration, we'll just list the categories and services in text:
+      let y = 30;
+      for (const category in data) {
+        svg.append("text")
+           .attr("x", 20)
+           .attr("y", y)
+           .text(category)
+           .attr("font-weight", "bold");
+        y += 30;
+        data[category].forEach(entry => {
+          svg.append("text")
+             .attr("x", 40)
+             .attr("y", y)
+             .text(entry.service + " (" + entry.username + ")")
+             .attr("font-size", "14px");
+          y += 25;
+        });
+        y += 20;
+      }
     }
   </script>
 </body>
