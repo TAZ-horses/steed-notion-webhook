@@ -5,3 +5,13 @@ services:
     branch: main
     buildCommand: ""
     staticPublishPath: docs
+
+  - type: web
+    name: steed-notion-webhook
+    env: python
+    branch: main
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "python3 notion_webhook_handler.py"
+    envVars:
+      - key: NOTION_SECRET
+        sync: false  # Set this manually in the Render dashboard
